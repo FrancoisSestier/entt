@@ -17,79 +17,29 @@ namespace entt {
 
 /**
  * @brief Inline variable designed to contain the definition of a concept.
- * @tparam Concept A concept class template.
+ * @tparam Concept Concept descriptor.
  * @tparam Type The type for which the definition is provided.
  */
-template<template<typename> class Concept, typename Type>
+template<class Concept, typename Type>
 inline constexpr auto poly_impl = value_list{};
-
-
-/*! @brief Static virtual table factory. */
-class poly_vtable {
-    template<typename Type, auto Candidate, typename Ret, typename... Args>
-    [[nodiscard]] static auto * vtable_entry(Ret(*)(Type &, Args...)) {
-        return +[](any &any, Args... args) -> Ret {
-            return std::invoke(Candidate, any_cast<Type &>(any), std::forward<Args>(args)...);
-        };
-    }
-
-    template<typename Type, auto Candidate, typename Ret, typename... Args>
-    [[nodiscard]] static auto * vtable_entry(Ret(*)(const Type &, Args...)) {
-        return +[](const any &any, Args... args) -> Ret {
-            return std::invoke(Candidate, any_cast<std::add_const_t<Type> &>(any), std::forward<Args>(args)...);
-        };
-    }
-
-    template<typename Type, auto Candidate, typename Ret, typename... Args>
-    [[nodiscard]] static auto * vtable_entry(Ret(Type:: *)(Args...)) {
-        return +[](any &any, Args... args) -> Ret {
-            return std::invoke(Candidate, any_cast<Type &>(any), std::forward<Args>(args)...);
-        };
-    }
-
-    template<typename Type, auto Candidate, typename Ret, typename... Args>
-    [[nodiscard]] static auto * vtable_entry(Ret(Type:: *)(Args...) const) {
-        return +[](const any &any, Args... args) -> Ret {
-            return std::invoke(Candidate, any_cast<std::add_const_t<Type> &>(any), std::forward<Args>(args)...);
-        };
-    }
-
-    template<typename Type, auto... Impl>
-    [[nodiscard]] static auto * instance(value_list<Impl...>) {
-        static const auto vtable = std::make_tuple(vtable_entry<Type, Impl>(Impl)...);
-        return &vtable;
-    }
-
-public:
-    /**
-     * @brief Returns a static virtual table for a specific concept and type.
-     * @tparam Concept A concept class template.
-     * @tparam Type The type for which to generate the virtual table.
-     * @return A static virtual table for the given concept and type.
-     */
-    template<template<typename> class Concept, typename Type>
-    [[nodiscard]] static auto * instance() {
-        return instance<Type>(poly_impl<Concept, Type>);
-    }
-};
 
 
 /*! @brief Inspector class used to infer the type of the virtual table. */
 struct poly_inspector {
     /**
-     * @brief Generic conversion operator (definition only).
-     * @tparam Type Type to which conversion is requested.
-     */
+    * @brief Generic conversion operator (definition only).
+    * @tparam Type Type to which conversion is requested.
+    */
     template <class Type>
     operator Type &&() const;
 
     /**
-     * @brief Dummy invocation function (definition only).
-     * @tparam Member Index of the function to invoke.
-     * @tparam Args Types of arguments to pass to the function.
-     * @param args The arguments to pass to the function.
-     * @return A poly inspector convertible to any type.
-     */
+    * @brief Dummy invocation function (definition only).
+    * @tparam Member Index of the function to invoke.
+    * @tparam Args Types of arguments to pass to the function.
+    * @param args The arguments to pass to the function.
+    * @return A poly inspector convertible to any type.
+    */
     template<auto Member, typename... Args>
     poly_inspector invoke(Args &&... args) const;
 
@@ -97,6 +47,75 @@ struct poly_inspector {
     template<auto Member, typename... Args>
     poly_inspector invoke(Args &&... args);
 };
+
+
+/*! @brief Static virtual table factory. */
+class poly_vtable {
+    template<typename Type, typename Ret, typename... Args>
+    static auto vtable_entry_type(Ret(*)(Type &, Args...)) -> Ret(*)(any &, Args...);
+
+    template<typename Type, typename Ret, typename... Args>
+    static auto vtable_entry_type(Ret(*)(const Type &, Args...)) -> Ret(*)(const any &, Args...);
+
+    template<typename Type, typename Ret, typename... Args>
+    static auto vtable_entry_type(Ret(*)(Args...)) -> Ret(*)(const any &, Args...);
+
+    template<typename Type, typename Ret, typename... Args>
+    static auto vtable_entry_type(Ret(Type:: *)(Args...)) -> Ret(*)(any &, Args...);
+
+    template<typename Type, typename Ret, typename... Args>
+    static auto vtable_entry_type(Ret(Type:: *)(Args...) const) -> Ret(*)(const any &, Args...);
+
+    template<typename Type, auto... Candidate>
+    static auto vtable_type(value_list<Candidate...>) -> std::tuple<decltype(vtable_entry_type<Type>(Candidate))...>;
+
+    template<typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
+    [[nodiscard]] static void vtable_entry(Ret(* &entry)(Any &, Args...)) {
+        entry = +[](Any &any, Args... args) -> Ret {
+            if constexpr(std::is_invocable_r_v<Ret, decltype(Candidate), Args...>) {
+                return std::invoke(Candidate, std::forward<Args>(args)...);
+            } else {
+                return std::invoke(Candidate, any_cast<constness_as_t<Type, Any> &>(any), std::forward<Args>(args)...);
+            }
+        };
+    }
+
+    template<typename Concept, typename Type, auto... Candidate, auto... Index>
+    [[nodiscard]] static auto make_vtable(value_list<Candidate...>, std::index_sequence<Index...>) {
+        type<Concept> vtable{};
+        (vtable_entry<Type, Candidate>(std::get<Index>(vtable)), ...);
+        return vtable;
+    }
+
+public:
+    /**
+     * @brief Virtual table type.
+     * @tparam Concept Concept descriptor.
+     */
+    template<typename Concept>
+    using type = decltype(vtable_type<typename Concept::template type<poly_inspector>>(poly_impl<Concept, typename Concept::template type<poly_inspector>>));
+
+    /**
+     * @brief Returns a static virtual table for a specific concept and type.
+     * @tparam Concept Concept descriptor.
+     * @tparam Type The type for which to generate the virtual table.
+     * @return A static virtual table for the given concept and type.
+     */
+    template<typename Concept, typename Type>
+    [[nodiscard]] static const auto * instance() {
+        constexpr auto impl = poly_impl<Concept, Type>;
+        static const auto vtable = make_vtable<Concept, Type>(impl, std::make_index_sequence<decltype(impl)::size>{});
+        return &vtable;
+    }
+};
+
+
+/**
+ * @brief Helper type.
+ * @tparam Concept Concept descriptor.
+ */
+template<typename Concept>
+using poly_vtable_t = typename poly_vtable::type<Concept>;
 
 
 /**
@@ -153,13 +172,16 @@ decltype(auto) poly_call(Poly &&self, Args &&... args) {
  * Below is a minimal example of use:
  *
  * ```cpp
- * template<typename Base>
- * struct Drawable: Base {
- *     void draw() { entt::poly_call<0>(*this); }
+ * struct Drawable {
+ *     template<typename Base>
+ *     struct type: Base {
+ *         void draw() { entt::poly_call<0>(*this); }
+ *     };
  * };
  *
+ *
  * template<typename Type>
- * inline constexpr auto entt::poly_impl<Drawable, Type> = entt::value_list<&Type::draw>{};
+ * inline constexpr const entt::poly_impl<Drawable, Type> = entt::value_list<&Type::draw>{};
  *
  * using drawable = entt::poly<Drawable>;
  *
@@ -179,14 +201,12 @@ decltype(auto) poly_call(Poly &&self, Args &&... args) {
  * Moreover, thanks to small buffer optimization, it limits the number of
  * allocations to a minimum where possible.
  *
- * @tparam Concept Concept class template.
+ * @tparam Concept Concept descriptor.
  */
-template<template<typename> class Concept>
-class poly: public Concept<poly_base<poly<Concept>>> {
+template<typename Concept>
+class poly: public Concept::template type<poly_base<poly<Concept>>> {
     /*! @brief A poly base is allowed to snoop into a poly object. */
     friend struct poly_base<poly<Concept>>;
-
-    using vtable_t = std::remove_pointer_t<decltype(poly_vtable::instance<Concept, Concept<poly_inspector>>())>;
 
 public:
     /*! @brief Default constructor. */
@@ -319,7 +339,7 @@ public:
 
 private:
     any storage;
-    const vtable_t *vtable;
+    const poly_vtable_t<Concept> *vtable;
 };
 
 

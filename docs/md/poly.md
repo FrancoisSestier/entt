@@ -9,6 +9,7 @@
   * [Other libraries](#other-libraries)
 * [Concept and implementation](#concept-and-implementation)
 * [Static polymorphism in the wild](#static-polymorphism-in-the-wild)
+* [What is next](#what-is-next)
 <!--
 @endcond TURN_OFF_DOXYGEN
 -->
@@ -53,7 +54,7 @@ but perhaps my ignorance comes into play here. In my opinion, its only flaw is
 the API which I find slightly more cumbersome than other solutions.<br/>
 The latter was undoubtedly a source of inspiration for this module, although I
 opted for different choices in the implementation of both the final API and some
-features.
+features, also considering some future additions I have in mind.
 
 Either way, the authors are gurus of the C++ community, people I only have to
 learn from.
@@ -63,12 +64,14 @@ learn from.
 The first thing to do to create a _type-erasing polymorphic object wrapper_ (to
 use the terminology introduced by Eric Niebler) is to define a _concept_ that
 types will have to adhere to.<br/>
-In `EnTT`, this translates into the definition of a template class as follows:
+In `EnTT`, this translates into the definition of a class as follows:
 
 ```cpp
-template<typename Base>
-struct Drawable: Base {
-    void draw() { this->template invoke<0>(*this); }
+struct Drawable {
+    template<typename Base>
+    struct type: Base {
+        void draw() { this->template invoke<0>(*this); }
+    };
 };
 ```
 
@@ -82,13 +85,21 @@ the language. However, there exists also an alternative that goes through an
 external call:
 
 ```cpp
-template<typename Base>
-struct Drawable: Base {
-    void draw() { entt::poly_call<0>(*this); }
+struct Drawable {
+    template<typename Base>
+    struct type: Base {
+        void draw() { entt::poly_call<0>(*this); }
+    };
 };
 ```
 
-Once the _concept_ is defined, users need to specialize a template variable to
+The reason for a _container class_ (`Drawable` in the example) is soon explained
+instead. By doing so, it's possible for the user to add open template parameters
+to be filled according to the application logic.<br/>
+This feature is used within the library itself and I found the need for that in
+the hard way.
+
+Once the _concept_ is defined, users have to specialize a template variable to
 tell the system how any type can satisfy its requirements:
 
 ```cpp
@@ -159,3 +170,22 @@ drawable d{std::ref(c)};
 
 In this case, although the interface of the `poly` object doesn't change, it
 won't construct any element or take care of destroying the referenced object.
+
+# What is next
+
+At the moment, the approach is sort of a mix between that proposed by `dyno` and
+that offered by `folly`.<br/>
+As I said, I fell in love with both of these libraries and tried to put together
+what I liked the most.
+
+Some extensions I plan to do in the future are:
+
+* Support for const references to unmanaged objects, always accessible through
+  an opaque instance and such that a `poly<Drawable>` is enough for all cases.
+
+* Support for named functions, because `poly_call<0>` works but is definitely
+  error-prone while `poly_call<"draw"_hs>` is really tempting.
+
+I'm sure other things will come to mind in the future, but in the meantime this
+little module is enough to elegantly solve some of the library problems due to
+heavy use of type erasure.

@@ -3,27 +3,29 @@
 #include <gtest/gtest.h>
 #include <entt/poly/poly.hpp>
 
-template<typename Base>
-struct concept: Base {
-    void incr() { entt::poly_call<0>(*this); }
-    void set(int v) { entt::poly_call<1>(*this, v); }
-    int get() const { return entt::poly_call<2>(*this); }
-    void decr() { entt::poly_call<3>(*this); }
-    int mul(int v) { return entt::poly_call<4>(*this, v); }
+struct Clazz {
+    template<typename Base>
+    struct type: Base {
+        void incr() { entt::poly_call<0>(*this); }
+        void set(int v) { entt::poly_call<1>(*this, v); }
+        int get() const { return entt::poly_call<2>(*this); }
+        void decr() { entt::poly_call<3>(*this); }
+        int mul(int v) { return entt::poly_call<4>(*this, v); }
+    };
 };
 
 template<typename Type>
-void decr(Type &self) {
+static void decr(Type &self) {
     self.set(self.get()-1);
 }
 
 template<typename Type>
-int mul(const Type &self, int v) {
+static double mul(const Type &self, double v) {
     return v * self.get();
 }
 
 template<typename Type>
-inline constexpr auto entt::poly_impl<concept, Type> =
+inline constexpr const auto entt::poly_impl<Clazz, Type> =
     entt::value_list<
         &Type::incr,
         &Type::set,
@@ -32,7 +34,8 @@ inline constexpr auto entt::poly_impl<concept, Type> =
         &mul<Type>
     >{};
 
-struct impl {
+
+struct concrete {
     void incr() { ++value; }
     void set(int v) { value = v; }
     int get() const { return value; }
@@ -40,12 +43,12 @@ struct impl {
 };
 
 TEST(Poly, Functionalities) {
-    impl instance{};
+    concrete instance{};
 
-    entt::poly<concept> empty{};
-    entt::poly<concept> in_place{std::in_place_type<impl>, 3};
-    entt::poly<concept> alias{std::ref(instance)};
-    entt::poly<concept> value{impl{}};
+    entt::poly<Clazz> empty{};
+    entt::poly<Clazz> in_place{std::in_place_type<concrete>, 3};
+    entt::poly<Clazz> alias{std::ref(instance)};
+    entt::poly<Clazz> value{concrete{}};
 
     ASSERT_FALSE(empty);
     ASSERT_TRUE(in_place);
@@ -53,46 +56,46 @@ TEST(Poly, Functionalities) {
     ASSERT_TRUE(value);
 
     ASSERT_EQ(empty.type(), entt::type_info{});
-    ASSERT_EQ(in_place.type(), entt::type_id<impl>());
-    ASSERT_EQ(alias.type(), entt::type_id<impl>());
-    ASSERT_EQ(value.type(), entt::type_id<impl>());
+    ASSERT_EQ(in_place.type(), entt::type_id<concrete>());
+    ASSERT_EQ(alias.type(), entt::type_id<concrete>());
+    ASSERT_EQ(value.type(), entt::type_id<concrete>());
 
     ASSERT_EQ(alias.data(), &instance);
     ASSERT_EQ(std::as_const(alias).data(), &instance);
 
-    empty = impl{};
+    empty = concrete{};
 
     ASSERT_TRUE(empty);
     ASSERT_NE(empty.data(), nullptr);
     ASSERT_NE(std::as_const(empty).data(), nullptr);
-    ASSERT_EQ(empty.type(), entt::type_id<impl>());
+    ASSERT_EQ(empty.type(), entt::type_id<concrete>());
     ASSERT_EQ(empty.get(), 0);
 
-    empty.emplace<impl>(3);
+    empty.emplace<concrete>(3);
 
     ASSERT_TRUE(empty);
     ASSERT_EQ(empty.get(), 3);
 
-    entt::poly<concept> ref = in_place.ref();
+    entt::poly<Clazz> ref = in_place.ref();
 
     ASSERT_TRUE(ref);
     ASSERT_NE(ref.data(), nullptr);
     ASSERT_EQ(ref.data(), in_place.data());
     ASSERT_EQ(std::as_const(ref).data(), std::as_const(in_place).data());
-    ASSERT_EQ(ref.type(), entt::type_id<impl>());
+    ASSERT_EQ(ref.type(), entt::type_id<concrete>());
     ASSERT_EQ(ref.get(), 3);
 
-    entt::poly<concept> null{};
+    entt::poly<Clazz> null{};
     std::swap(empty, null);
 
     ASSERT_FALSE(empty);
 
-    entt::poly<concept> copy = in_place;
+    entt::poly<Clazz> copy = in_place;
 
     ASSERT_TRUE(copy);
     ASSERT_EQ(copy.get(), 3);
 
-    entt::poly<concept> move = std::move(copy);
+    entt::poly<Clazz> move = std::move(copy);
 
     ASSERT_TRUE(move);
     ASSERT_FALSE(copy);
@@ -100,8 +103,8 @@ TEST(Poly, Functionalities) {
 }
 
 TEST(Poly, Owned) {
-    entt::poly<concept> poly{impl{}};
-    auto *ptr = static_cast<impl *>(poly.data());
+    entt::poly<Clazz> poly{concrete{}};
+    auto *ptr = static_cast<concrete *>(poly.data());
     
     ASSERT_TRUE(poly);
     ASSERT_NE(poly.data(), nullptr);
@@ -124,8 +127,8 @@ TEST(Poly, Owned) {
 }
 
 TEST(Poly, Alias) {
-    impl instance{};
-    entt::poly<concept> poly{std::ref(instance)};
+    concrete instance{};
+    entt::poly<Clazz> poly{std::ref(instance)};
     
     ASSERT_TRUE(poly);
     ASSERT_NE(poly.data(), nullptr);
