@@ -50,7 +50,6 @@ class basic_registry {
     struct pool_data {
         poly_storage<Entity> poly;
         std::unique_ptr<basic_sparse_set<Entity>> pool{};
-        void(* remove)(basic_sparse_set<Entity> &, basic_registry &, const Entity *, const Entity *){};
     };
 
     template<typename...>
@@ -119,9 +118,6 @@ class basic_registry {
         if(auto &&pdata = pools[index]; !pdata.pool) {
             pdata.pool.reset(new storage_type<Component>());
             pdata.poly = std::ref(*static_cast<storage_type<Component> *>(pdata.pool.get()));
-            pdata.remove = +[](basic_sparse_set<Entity> &cpool, basic_registry &owner, const Entity *first, const Entity *last) {
-                static_cast<storage_type<Component> &>(cpool).remove(owner, first, last);
-            };
         }
 
         return static_cast<storage_type<Component> *>(pools[index].pool.get());
@@ -767,7 +763,7 @@ public:
 
         for(auto pos = pools.size(); pos; --pos) {
             if(auto &pdata = pools[pos-1]; pdata.pool && pdata.pool->contains(entity)) {
-                pdata.remove(*pdata.pool, *this, std::begin(wrap), std::end(wrap));
+                pdata.poly.remove(*this, std::begin(wrap), std::end(wrap));
             }
         }
     }
@@ -914,8 +910,8 @@ public:
     void clear() {
         if constexpr(sizeof...(Component) == 0) {
             for(auto pos = pools.size(); pos; --pos) {
-                if(const auto &pdata = pools[pos-1]; pdata.pool) {
-                    pdata.remove(*pdata.pool, *this, pdata.pool->data(), pdata.pool->data() + pdata.pool->size());
+                if(auto &pdata = pools[pos-1]; pdata.pool) {
+                    pdata.poly.remove(*this, pdata.pool->data(), pdata.pool->data() + pdata.pool->size());
                 }
             }
 

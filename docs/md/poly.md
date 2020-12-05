@@ -70,7 +70,7 @@ In `EnTT`, this translates into the definition of a class as follows:
 struct Drawable {
     template<typename Base>
     struct type: Base {
-        void draw() { this->template invoke<0>(*this); }
+        void draw() const { this->template invoke<0>(*this); }
     };
 };
 ```
@@ -88,7 +88,7 @@ external call:
 struct Drawable {
     template<typename Base>
     struct type: Base {
-        void draw() { entt::poly_call<0>(*this); }
+        void draw() const { entt::poly_call<0>(*this); }
     };
 };
 ```
@@ -104,7 +104,7 @@ tell the system how any type can satisfy its requirements:
 
 ```cpp
 template<typename Type>
-inline constexpr auto entt::poly_impl<Drawable, Type> = entt::value_list<&Type::draw>{};
+inline constexpr auto entt::poly_impl<Drawable, Type> = std::make_tuple(&Type::draw);
 ```
 
 In this case, it's stated that the `draw` method of a generic type will be
@@ -115,18 +115,16 @@ differently. Moreover, it's easy to specialize it for families of types:
 
 ```cpp
 template<typename Type>
-inline constexpr auto entt::poly_impl<Drawable, std::vector<Type>> = entt::value_list<&std::vector<Type>::size>{};
+inline constexpr auto entt::poly_impl<Drawable, std::vector<Type>> = std::make_tuple(&std::vector<Type>::size);
 ```
 
 Finally, an implementation doesn't have to consist of just member functions.
-Free functions are an alternative to fill any gaps in the interface of a type:
+Free functions as well as decayed non-generic lambdas are valid alternatives to
+fill any gaps in the interface of a type:
 
 ```cpp
 template<typename Type>
-void print(Type &self) { self.print(); }
-
-template<typename Type>
-inline constexpr auto entt::poly_impl<Drawable, Type> = entt::value_list<&print<Type>>{};
+inline constexpr auto entt::poly_impl<Drawable, Type> = std::make_tuple(+[](const Type &self) { self.print(); });
 ```
 
 Refer to the variable template definition for more details.
@@ -141,11 +139,11 @@ requirements:
 using drawable = entt::poly<Drawable>;
 
 struct circle {
-    void draw() { /* ... */ }
+    void draw() const { /* ... */ }
 };
 
 struct square {
-    void draw() { /* ... */ }
+    void draw() const { /* ... */ }
 };
 
 // ...

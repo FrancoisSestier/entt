@@ -26,13 +26,13 @@ static double mul(const Type &self, double v) {
 
 template<typename Type>
 inline constexpr const auto entt::poly_impl<Clazz, Type> =
-    entt::value_list<
+    std::make_tuple(
         &Type::incr,
         &Type::set,
         &Type::get,
-        &decr<Type>,
-        &mul<Type>
-    >{};
+        +[](Type &self) { self.set(self.get()-1); },
+        +[](const Type &self, double v) -> double { return v * self.get(); }
+    );
 
 
 struct concrete {

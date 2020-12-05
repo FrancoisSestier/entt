@@ -13,54 +13,31 @@
 namespace entt {
 
 
-template<typename Entity>
+template<typename Entity, typename = void>
 struct Storage {
     template<typename Base>
     struct type: Base {
         using size_type = std::size_t;
         using entity_type = Entity;
         using value_type = void;
-    
+
         [[nodiscard]] type_info component() const ENTT_NOEXCEPT {
     	    return entt::poly_call<0>(*this);
         }
 
-        [[nodiscard]] size_type size() const ENTT_NOEXCEPT {
-            return entt::poly_call<1>(*this);
+        void remove(basic_registry<entity_type> &registry, const entity_type *first, const entity_type *last) {
+            entt::poly_call<1>(*this, registry, first, last);
         }
-
-        [[nodiscard]] const entity_type * data() const ENTT_NOEXCEPT {
-            return entt::poly_call<2>(*this);
-        }
-
-        [[nodiscard]] const void * raw() const ENTT_NOEXCEPT {
-            return entt::poly_call<3>(*this);
-        }
-    
-        [[nodiscard]] bool contains(const entity_type entt) const {
-            return entt::poly_call<4>(*this, entt);
-        }
-
-        void clear() {
-            entt::poly_call<5>(*this);
-        }
-
-        void remove(basic_registry<Entity> &, Entity) {}
     };
 };
 
 
 template<typename Entity, typename Type>
 inline constexpr const auto poly_impl<Storage<Entity>, Type> =
-    entt::value_list<
+    std::make_tuple(
         entt::overload<type_info()>(&type_id<typename Type::value_type>),
-        &Type::size,
-        &Type::data,
-        entt::overload<const typename Type::value_type *() const>(&Type::raw),
-        &Type::contains,
-        &Type::clear,
-        entt::overload<void(basic_registry<Entity> &, Entity), Type>(&Type::remove)
-    >{};
+        entt::overload<void(basic_registry<Entity> &, const Entity *, const Entity *), Type>(&Type::remove)
+    );
 
 
 template<typename Entity>
