@@ -72,11 +72,14 @@ struct Drawable {
     struct type: Base {
         void draw() const { this->template invoke<0>(*this); }
     };
+
+    template<typename Type>
+    static constexpr auto value = std::make_tuple(&Type::draw);
 };
 ```
 
-The example is purposely minimal but the functions can receive values and return
-arguments. The former will be returned by the call to `invoke`, the latter must
+The example is purposely minimal. All functions can receive values and return
+arguments. The latter will be returned by the call to `invoke`, the former must
 be passed to the same function after the reference to `this` instead.<br/>
 As for `invoke`, this is a name that is injected into the _concept_ through
 `Base`, from which one must necessarily inherit. Since it's also a dependent
@@ -90,42 +93,34 @@ struct Drawable {
     struct type: Base {
         void draw() const { entt::poly_call<0>(*this); }
     };
+
+    // ...
+};
+```
+
+In both case, the `value` variable template is used to instruct the system on
+how any type can satisfy the requirements of the concept.<br/>
+In this case, it's stated that the `draw` method of a generic type will be
+enough to fulfill the `Drawable` concept.
+
+An implementation doesn't have to consist of just member functions.<br/>
+Free functions as well as decayed non-generic lambdas are valid alternatives to
+fill any gaps in the interface of a type:
+
+```cpp
+struct Drawable {
+    // ...
+
+    template<typename Type>
+    static constexpr auto value = std::make_tuple(+[](const Type &self) { self.draw(); });
 };
 ```
 
 The reason for a _container class_ (`Drawable` in the example) is soon explained
 instead. By doing so, it's possible for the user to add open template parameters
-to be filled according to the application logic.<br/>
+to be provided according to the application logic.<br/>
 This feature is used within the library itself and I found the need for that in
 the hard way.
-
-Once the _concept_ is defined, users have to specialize a template variable to
-tell the system how any type can satisfy its requirements:
-
-```cpp
-template<typename Type>
-inline constexpr auto entt::poly_impl<Drawable, Type> = std::make_tuple(&Type::draw);
-```
-
-In this case, it's stated that the `draw` method of a generic type will be
-enough to satisfy the requirements of the `Drawable` concept.<br/>
-The `poly_impl` variable template can be specialized in a generic way as in the
-example above, or for a specific type where this satisfies the requirements
-differently. Moreover, it's easy to specialize it for families of types:
-
-```cpp
-template<typename Type>
-inline constexpr auto entt::poly_impl<Drawable, std::vector<Type>> = std::make_tuple(&std::vector<Type>::size);
-```
-
-Finally, an implementation doesn't have to consist of just member functions.
-Free functions as well as decayed non-generic lambdas are valid alternatives to
-fill any gaps in the interface of a type:
-
-```cpp
-template<typename Type>
-inline constexpr auto entt::poly_impl<Drawable, Type> = std::make_tuple(+[](const Type &self) { self.print(); });
-```
 
 Refer to the variable template definition for more details.
 

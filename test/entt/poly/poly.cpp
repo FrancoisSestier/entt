@@ -12,28 +12,17 @@ struct Clazz {
         void decr() { entt::poly_call<3>(*this); }
         int mul(int v) { return entt::poly_call<4>(*this, v); }
     };
+
+    template<typename Type>
+    static constexpr auto value = 
+        std::make_tuple(
+            &Type::incr,
+            &Type::set,
+            &Type::get,
+            +[](Type &self) { self.set(self.get()-1); },
+            +[](const Type &self, double v) -> double { return v * self.get(); }
+        );
 };
-
-template<typename Type>
-static void decr(Type &self) {
-    self.set(self.get()-1);
-}
-
-template<typename Type>
-static double mul(const Type &self, double v) {
-    return v * self.get();
-}
-
-template<typename Type>
-inline constexpr const auto entt::poly_impl<Clazz, Type> =
-    std::make_tuple(
-        &Type::incr,
-        &Type::set,
-        &Type::get,
-        +[](Type &self) { self.set(self.get()-1); },
-        +[](const Type &self, double v) -> double { return v * self.get(); }
-    );
-
 
 struct concrete {
     void incr() { ++value; }
