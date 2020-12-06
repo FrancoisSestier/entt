@@ -22,11 +22,11 @@ struct Storage {
         using value_type = void;
 
         [[nodiscard]] type_info component() const ENTT_NOEXCEPT {
-    	    return entt::poly_call<0>(*this);
+            return entt::poly_call<0>(*this);
         }
 
-        void remove(basic_registry<entity_type> &registry, const entity_type *first, const entity_type *last) {
-            entt::poly_call<1>(*this, registry, first, last);
+        void remove(basic_registry<entity_type> &reg, const entity_type *first, const entity_type *last) {
+            entt::poly_call<1>(*this, reg, first, last);
         }
     };
 
