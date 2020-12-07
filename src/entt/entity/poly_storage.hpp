@@ -17,9 +17,6 @@ template<typename Entity, typename = void>
 struct Storage {
     using entity_type = Entity;
 
-    template<typename Type>
-    static type_info foo() { return type_id<Type>(); }
-
     template<typename Base>
     struct type: Base {
         using value_type = void;
@@ -34,11 +31,11 @@ struct Storage {
     };
 
     template<typename Type>
-    using vtable =
+    inline static constexpr auto value =
         value_list<
-            &foo<typename Type::value_type>,
+            &type_id<typename Type::value_type>,
             entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
-        >;
+        >{};
 };
 
 

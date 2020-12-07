@@ -20,14 +20,14 @@ struct Clazz {
     };
 
     template<typename Type>
-    using vtable =
+    inline static constexpr auto value =
         entt::value_list<
             &Type::incr,
             &Type::set,
             &Type::get,
             &decr<Type>,
             &mul<Type>
-        >;
+        >{};
 };
 
 struct concrete {

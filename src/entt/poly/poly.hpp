@@ -89,7 +89,7 @@ public:
     /**
      * @brief Virtual table type.
      */
-    using type = decltype(vtable(typename Concept::template vtable<inspector>{}));
+    using type = decltype(vtable(Concept::template value<inspector>));
 
     /**
      * @brief Returns a static virtual table for a specific concept and type.
@@ -98,7 +98,7 @@ public:
      */
     template<typename Type>
     [[nodiscard]] static const auto * instance() {
-        static const auto vtable = make_vtable<Type>(typename Concept::template vtable<Type>{}, std::make_index_sequence<std::tuple_size_v<type>>{});
+        static const auto vtable = make_vtable<Type>(Concept::template value<Type>, std::make_index_sequence<std::tuple_size_v<type>>{});
         return &vtable;
     }
 };
