@@ -4,10 +4,10 @@
 #include <entt/poly/poly.hpp>
 
 template<typename Type>
-static void decr(Type &self) { self.set(self.get()-1); }
+void decr(Type &self) { self.set(self.get()-1); }
 
 template<typename Type>
-static double mul(const Type &self, double v) { return v * self.get(); }
+double mul(const Type &self, double v) { return v * self.get(); }
 
 struct Clazz {
     template<typename Base>
@@ -20,13 +20,14 @@ struct Clazz {
     };
 
     template<typename Type>
-    using vtable = entt::value_list<
-        &Type::incr,
-        &Type::set,
-        &Type::get,
-        &decr<Type>,
-        &mul<Type>
-    >;
+    using vtable =
+        entt::value_list<
+            &Type::incr,
+            &Type::set,
+            &Type::get,
+            &decr<Type>,
+            &mul<Type>
+        >;
 };
 
 struct concrete {

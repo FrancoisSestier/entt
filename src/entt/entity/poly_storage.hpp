@@ -31,10 +31,11 @@ struct Storage {
     };
 
     template<typename Type>
-    using vtable = value_list<
-        entt::overload<type_info()>(&type_id<typename Type::value_type>),
-        entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
-    >;
+    using vtable =
+        value_list<
+            entt::overload<type_info()>(&type_id<typename Type::value_type>),
+            entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
+        >;
 };
 
 

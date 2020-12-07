@@ -32,11 +32,11 @@ struct poly_inspector {
      * @return A poly inspector convertible to any type.
      */
     template<auto Member, typename... Args>
-    poly_inspector invoke(Args &&... args) const;
+    poly_inspector invoke(Args &&...) const;
 
     /*! @copydoc invoke */
     template<auto Member, typename... Args>
-    poly_inspector invoke(Args &&... args);
+    poly_inspector invoke(Args &&...);
 };
 
 
@@ -68,8 +68,8 @@ class poly_vtable {
     -> std::tuple<decltype(vtable_entry(Candidate))...>;
 
     template<typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
-    static auto make_vtable_entry(Ret(*)(Any &, Args...)) {
-        return +[](Any &any, Args... args) -> Ret {
+    static void make_vtable_entry(Ret(* &entry)(Any &, Args...)) {
+        entry = +[](Any &any, Args... args) -> Ret {
             if constexpr(std::is_invocable_r_v<Ret, decltype(Candidate), Args...>) {
                 return std::invoke(Candidate, std::forward<Args>(args)...);
             } else {
@@ -78,9 +78,11 @@ class poly_vtable {
         };
     }
 
-    template<typename Type, auto... Candidate>
-    [[nodiscard]] static auto make_vtable(value_list<Candidate...>) {
-        return std::apply([](auto... impl) { return std::make_tuple(make_vtable_entry<Type, Candidate>(impl)...); }, type{});
+    template<typename Type, auto... Candidate, auto... Index>
+    [[nodiscard]] static auto make_vtable(value_list<Candidate...>, std::index_sequence<Index...>) {
+        type impl{};
+        (make_vtable_entry<Type, Candidate>(std::get<Index>(impl)), ...);
+        return impl;
     }
 
 public:
@@ -96,7 +98,7 @@ public:
      */
     template<typename Type>
     [[nodiscard]] static const auto * instance() {
-        static const auto vtable = make_vtable<Type>(typename Concept::template vtable<Type>{});
+        static const auto vtable = make_vtable<Type>(typename Concept::template vtable<Type>{}, std::make_index_sequence<std::tuple_size_v<type>>{});
         return &vtable;
     }
 };
