@@ -31,11 +31,10 @@ struct Storage {
     };
 
     template<typename Type>
-    inline static constexpr auto value =
-        value_list<
-            &type_id<typename Type::value_type>,
-            entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
-        >{};
+    using vtable = value_list<
+        &type_id<typename Type::value_type>,
+        entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
+    >;
 };
 
 
