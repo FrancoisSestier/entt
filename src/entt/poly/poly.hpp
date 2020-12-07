@@ -63,13 +63,13 @@ class poly_vtable {
     template<typename Ret, typename... Args>
     static auto vtable_entry(Ret(inspector:: *)(Args...) const) -> Ret(*)(const any &, Args...);
 
-    template<typename... Type>
-    static auto vtable(std::tuple<Type...>)
-    -> std::tuple<decltype(vtable_entry(std::declval<Type>()))...>;
+    template<auto... Candidate>
+    static auto vtable(value_list<Candidate...>)
+    -> std::tuple<decltype(vtable_entry(Candidate))...>;
 
     template<typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
-    static void make_vtable_entry(Ret(* &entry)(Any &, Args...)) {
-        entry = +[](Any &any, Args... args) -> Ret {
+    static auto make_vtable_entry(Ret(*)(Any &, Args...)) {
+        return +[](Any &any, Args... args) -> Ret {
             if constexpr(std::is_invocable_r_v<Ret, decltype(Candidate), Args...>) {
                 return std::invoke(Candidate, std::forward<Args>(args)...);
             } else {
@@ -78,18 +78,16 @@ class poly_vtable {
         };
     }
 
-    template<typename Type, auto... Index>
-    [[nodiscard]] static auto make_vtable(std::index_sequence<Index...>) {
-        type impl{};
-        (make_vtable_entry<Type, std::get<Index>(Concept::template vtable<Type>())>(std::get<Index>(impl)), ...);
-        return impl;
+    template<typename Type, auto... Candidate>
+    [[nodiscard]] static auto make_vtable(value_list<Candidate...>) {
+        return std::apply([](auto... impl) { return std::make_tuple(make_vtable_entry<Type, Candidate>(impl)...); }, type{});
     }
 
 public:
     /**
      * @brief Virtual table type.
      */
-    using type = decltype(vtable(Concept::template vtable<inspector>()));
+    using type = decltype(vtable(typename Concept::template vtable<inspector>{}));
 
     /**
      * @brief Returns a static virtual table for a specific concept and type.
@@ -98,7 +96,7 @@ public:
      */
     template<typename Type>
     [[nodiscard]] static const auto * instance() {
-        static const auto vtable = make_vtable<Type>(std::make_index_sequence<std::tuple_size_v<decltype(Concept::template vtable<inspector>())>>{});
+        static const auto vtable = make_vtable<Type>(typename Concept::template vtable<Type>{});
         return &vtable;
     }
 };

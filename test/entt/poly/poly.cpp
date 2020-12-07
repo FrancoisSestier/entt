@@ -3,6 +3,12 @@
 #include <gtest/gtest.h>
 #include <entt/poly/poly.hpp>
 
+template<typename Type>
+static void decr(Type &self) { self.set(self.get()-1); }
+
+template<typename Type>
+static double mul(const Type &self, double v) { return v * self.get(); }
+
 struct Clazz {
     template<typename Base>
     struct type: Base {
@@ -14,15 +20,13 @@ struct Clazz {
     };
 
     template<typename Type>
-    static constexpr auto vtable() {
-        return std::make_tuple(
-            &Type::incr,
-            &Type::set,
-            &Type::get,
-            +[](Type &self) { self.set(self.get()-1); },
-            +[](const Type &self, double v) -> double { return v * self.get(); }
-        );
-    }
+    using vtable = entt::value_list<
+        &Type::incr,
+        &Type::set,
+        &Type::get,
+        &decr<Type>,
+        &mul<Type>
+    >;
 };
 
 struct concrete {
