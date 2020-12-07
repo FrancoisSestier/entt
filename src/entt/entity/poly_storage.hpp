@@ -14,8 +14,11 @@ namespace entt {
 
 
 template<typename Entity, typename = void>
-struct Storage {
+class Storage {
     using entity_type = Entity;
+
+    template<typename Type>
+    static type_info foo() { return type_id<Type>(); }
 
     template<typename Base>
     struct type: Base {
@@ -33,7 +36,7 @@ struct Storage {
     template<typename Type>
     using vtable =
         value_list<
-            entt::overload<type_info() ENTT_NOEXCEPT>(&type_id<typename Type::value_type>),
+            &foo<Type>,
             entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
         >;
 };
