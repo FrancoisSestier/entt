@@ -31,11 +31,12 @@ struct Storage {
     };
 
     template<typename Type>
-    static constexpr auto value =
-        std::make_tuple(
+    static constexpr auto vtable() {
+        return std::make_tuple(
             entt::overload<type_info()>(&type_id<typename Type::value_type>),
             entt::overload<void(basic_registry<entity_type> &, const entity_type *, const entity_type *), Type>(&Type::remove)
         );
+    }
 };
 
 

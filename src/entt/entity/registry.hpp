@@ -348,10 +348,10 @@ public:
 
     /**
      * @brief Returns the head of the list of destroyed entities.
-     * 
+     *
      * This function is intended for use in conjunction with `assign`.<br/>
      * The returned entity has an invalid identifier in all cases.
-     * 
+     *
      * @return The head of the list of destroyed entities.
      */
     [[nodiscard]] entity_type destroyed() const ENTT_NOEXCEPT {
@@ -759,7 +759,7 @@ public:
      */
     void remove_all(const entity_type entity) {
         ENTT_ASSERT(valid(entity));
-        entity_type wrap[1]{entity};
+        entity_type wrap[1u]{entity};
 
         for(auto pos = pools.size(); pos; --pos) {
             if(auto &pdata = pools[pos-1]; pdata.pool && pdata.pool->contains(entity)) {

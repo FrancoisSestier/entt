@@ -14,14 +14,15 @@ struct Clazz {
     };
 
     template<typename Type>
-    static constexpr auto value = 
-        std::make_tuple(
+    static constexpr auto vtable() {
+        return std::make_tuple(
             &Type::incr,
             &Type::set,
             &Type::get,
             +[](Type &self) { self.set(self.get()-1); },
             +[](const Type &self, double v) -> double { return v * self.get(); }
         );
+    }
 };
 
 struct concrete {
@@ -94,16 +95,16 @@ TEST(Poly, Functionalities) {
 TEST(Poly, Owned) {
     entt::poly<Clazz> poly{concrete{}};
     auto *ptr = static_cast<concrete *>(poly.data());
-    
+
     ASSERT_TRUE(poly);
     ASSERT_NE(poly.data(), nullptr);
     ASSERT_NE(std::as_const(poly).data(), nullptr);
     ASSERT_EQ(ptr->value, 0);
     ASSERT_EQ(poly.get(), 0);
-    
+
     poly.set(1);
     poly.incr();
-    
+
     ASSERT_EQ(ptr->value, 2);
     ASSERT_EQ(poly.get(), 2);
     ASSERT_EQ(poly.mul(3), 6);
@@ -118,16 +119,16 @@ TEST(Poly, Owned) {
 TEST(Poly, Alias) {
     concrete instance{};
     entt::poly<Clazz> poly{std::ref(instance)};
-    
+
     ASSERT_TRUE(poly);
     ASSERT_NE(poly.data(), nullptr);
     ASSERT_NE(std::as_const(poly).data(), nullptr);
     ASSERT_EQ(instance.value, 0);
     ASSERT_EQ(poly.get(), 0);
-    
+
     poly.set(1);
     poly.incr();
-    
+
     ASSERT_EQ(instance.value, 2);
     ASSERT_EQ(poly.get(), 2);
     ASSERT_EQ(poly.mul(3), 6);

@@ -74,7 +74,9 @@ struct Drawable {
     };
 
     template<typename Type>
-    static constexpr auto value = std::make_tuple(&Type::draw);
+    static constexpr auto vtable() {
+        return std::make_tuple(&Type::draw);
+    }
 };
 ```
 
@@ -84,8 +86,8 @@ be passed to the same function after the reference to `this` instead.<br/>
 As for `invoke`, this is a name that is injected into the _concept_ through
 `Base`, from which one must necessarily inherit. Since it's also a dependent
 name, the `this-> template` form is unfortunately necessary due to the rules of
-the language. However, there exists also an alternative that goes through an
-external call:
+the language. However, there exists an alternative that goes through an external
+call:
 
 ```cpp
 struct Drawable {
@@ -98,8 +100,9 @@ struct Drawable {
 };
 ```
 
-In both case, the `value` variable template is used to instruct the system on
-how any type can satisfy the requirements of the concept.<br/>
+In both case, the `vtable` function template is used to return an implementation
+of the vtable with which to instruct the system on how any type can satisfy the
+requirements of a concept.<br/>
 In this case, it's stated that the `draw` method of a generic type will be
 enough to fulfill the `Drawable` concept.
 
@@ -112,7 +115,9 @@ struct Drawable {
     // ...
 
     template<typename Type>
-    static constexpr auto value = std::make_tuple(+[](const Type &self) { self.draw(); });
+    static constexpr auto vtable() {
+        return std::make_tuple(+[](const Type &self) { self.draw(); });
+    }
 };
 ```
 
@@ -121,8 +126,6 @@ instead. By doing so, it's possible for the user to add open template parameters
 to be provided according to the application logic.<br/>
 This feature is used within the library itself and I found the need for that in
 the hard way.
-
-Refer to the variable template definition for more details.
 
 # Static polymorphism in the wild
 
