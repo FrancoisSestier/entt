@@ -32,11 +32,11 @@ struct poly_inspector {
      * @return A poly inspector convertible to any type.
      */
     template<auto Member, typename... Args>
-    poly_inspector invoke(Args &&...) const;
+    poly_inspector invoke(Args &&... args) const;
 
     /*! @copydoc invoke */
     template<auto Member, typename... Args>
-    poly_inspector invoke(Args &&...);
+    poly_inspector invoke(Args &&... args);
 };
 
 
@@ -86,9 +86,7 @@ class poly_vtable {
     }
 
 public:
-    /**
-     * @brief Virtual table type.
-     */
+    /*! @brief Virtual table type. */
     using type = decltype(vtable(typename Concept::template vtable<inspector>{}));
 
     /**
@@ -173,9 +171,7 @@ decltype(auto) poly_call(Poly &&self, Args &&... args) {
  *     };
  *
  *     template<typename Type>
- *     static constexpr auto vtable() {
- *         return std::make_tuple(&Type::draw);
- *     }
+ *     using vtable = entt::value_list<&Type::draw>;
  * };
  *
  *

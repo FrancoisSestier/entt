@@ -1147,12 +1147,12 @@ public:
         std::vector<const basic_sparse_set<Entity> *> filter(std::distance(from, to));
 
         std::transform(first, last, component.begin(), [this](const auto ctype) {
-            const auto it = std::find_if(pools.cbegin(), pools.cend(), [ctype](auto &&pdata) { return pdata.pool && pdata.poly.component().hash() == ctype; });
+            const auto it = std::find_if(pools.cbegin(), pools.cend(), [ctype](auto &&pdata) { return pdata.pool && pdata.poly.info().hash() == ctype; });
             return it == pools.cend() ? nullptr : it->pool.get();
         });
 
         std::transform(from, to, filter.begin(), [this](const auto ctype) {
-            const auto it = std::find_if(pools.cbegin(), pools.cend(), [ctype](auto &&pdata) { return pdata.pool && pdata.poly.component().hash() == ctype; });
+            const auto it = std::find_if(pools.cbegin(), pools.cend(), [ctype](auto &&pdata) { return pdata.pool && pdata.poly.info().hash() == ctype; });
             return it == pools.cend() ? nullptr : it->pool.get();
         });
 
@@ -1463,7 +1463,7 @@ public:
     void visit(entity_type entity, Func func) const {
         for(auto pos = pools.size(); pos; --pos) {
             if(const auto &pdata = pools[pos-1]; pdata.pool && pdata.pool->contains(entity)) {
-                func(pdata.poly.component());
+                func(pdata.poly.info());
             }
         }
     }
@@ -1492,7 +1492,7 @@ public:
     void visit(Func func) const {
         for(auto pos = pools.size(); pos; --pos) {
             if(const auto &pdata = pools[pos-1]; pdata.pool) {
-                func(pdata.poly.component());
+                func(pdata.poly.info());
             }
         }
     }

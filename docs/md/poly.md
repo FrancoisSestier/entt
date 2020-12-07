@@ -74,9 +74,7 @@ struct Drawable {
     };
 
     template<typename Type>
-    static constexpr auto vtable() {
-        return std::make_tuple(&Type::draw);
-    }
+    using vtable = entt::value_list<&Type::draw>;
 };
 ```
 
@@ -100,26 +98,12 @@ struct Drawable {
 };
 ```
 
-In both case, the `vtable` function template is used to return an implementation
-of the vtable with which to instruct the system on how any type can satisfy the
+In both case, the `vtable` alias template is used to return an implementation
+of a vtable with which to instruct the system on how any type can satisfy the
 requirements of a concept.<br/>
 In this case, it's stated that the `draw` method of a generic type will be
-enough to fulfill the `Drawable` concept.
-
-An implementation doesn't have to consist of just member functions.<br/>
-Free functions as well as decayed non-generic lambdas are valid alternatives to
-fill any gaps in the interface of a type:
-
-```cpp
-struct Drawable {
-    // ...
-
-    template<typename Type>
-    static constexpr auto vtable() {
-        return std::make_tuple(+[](const Type &self) { self.draw(); });
-    }
-};
-```
+enough to fulfill the `Drawable` concept. Note that free functions are accepted
+as well.
 
 The reason for a _container class_ (`Drawable` in the example) is soon explained
 instead. By doing so, it's possible for the user to add open template parameters
