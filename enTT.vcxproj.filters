@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="single_include">
+      <UniqueIdentifier>{CAB08CD9-B67E-80DF-9F12-F1058B7F5C44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="single_include\entt">
+      <UniqueIdentifier>{5484B817-C0E5-9525-4953-DCD7B5B3CCE4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt">
+      <UniqueIdentifier>{97742FCF-8341-8ADA-AC5A-78829886BF68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\config">
+      <UniqueIdentifier>{DC139044-489F-FD08-51B0-80FDBDBA5909}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\core">
+      <UniqueIdentifier>{6F9BBD9E-DB5B-39D5-A496-825210167EB1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\entity">
+      <UniqueIdentifier>{23A52B49-8F30-990D-9841-1C02044CF50D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\locator">
+      <UniqueIdentifier>{FA16958A-E60F-B4DC-0F42-9961FB9993E8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\meta">
+      <UniqueIdentifier>{EDECC29E-59AD-3ED5-22E8-87528E6783B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\platform">
+      <UniqueIdentifier>{EB66F6A3-577D-F439-A0F4-7F5B0C4AC5C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\process">
+      <UniqueIdentifier>{658357C6-517C-7618-7AAE-5B9D66065624}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\resource">
+      <UniqueIdentifier>{AE0C4D8B-1A23-4B21-639A-D642CFEF1BA9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\entt\signal">
+      <UniqueIdentifier>{44557269-B0E0-DF2D-B9F1-622225FC3B2E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="single_include\entt\entt.hpp">
+      <Filter>single_include\entt</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\config\config.h">
+      <Filter>src\entt\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\config\version.h">
+      <Filter>src\entt\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\algorithm.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\attribute.h">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\family.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\fwd.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\hashed_string.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\ident.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\monostate.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\type_info.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\type_traits.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\core\utility.hpp">
+      <Filter>src\entt\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\entity.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\fwd.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\group.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\handle.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\helper.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\observer.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\organizer.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\registry.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\runtime_view.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\snapshot.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\sparse_set.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\storage.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\utility.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\view.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entity\view_pack.hpp">
+      <Filter>src\entt\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\entt.hpp">
+      <Filter>src\entt</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\fwd.hpp">
+      <Filter>src\entt</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\locator\locator.hpp">
+      <Filter>src\entt\locator</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\container.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\ctx.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\factory.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\internal.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\meta.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\pointer.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\policy.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\range.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\resolve.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\meta\type_traits.hpp">
+      <Filter>src\entt\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\platform\android-ndk-r17.hpp">
+      <Filter>src\entt\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\process\process.hpp">
+      <Filter>src\entt\process</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\process\scheduler.hpp">
+      <Filter>src\entt\process</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\resource\cache.hpp">
+      <Filter>src\entt\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\resource\fwd.hpp">
+      <Filter>src\entt\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\resource\handle.hpp">
+      <Filter>src\entt\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\resource\loader.hpp">
+      <Filter>src\entt\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\signal\delegate.hpp">
+      <Filter>src\entt\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\signal\dispatcher.hpp">
+      <Filter>src\entt\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\signal\emitter.hpp">
+      <Filter>src\entt\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\signal\fwd.hpp">
+      <Filter>src\entt\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\entt\signal\sigh.hpp">
+      <Filter>src\entt\signal</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
